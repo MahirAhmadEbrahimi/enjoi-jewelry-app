@@ -14,9 +14,8 @@ class _StartScreenState extends State<StartScreen> {
   void initState() {
     super.initState();
 
-    // wait 3 seconds
     Timer(const Duration(seconds: 3), () {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
