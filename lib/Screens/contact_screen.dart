@@ -81,7 +81,7 @@ class _ContactScreenState extends State<ContactScreen> {
                 /// ICON
                 const CircleAvatar(
                   radius: 35,
-                  backgroundColor: Color(0xff8BA37E),
+                  backgroundColor: Color.fromARGB(255, 136, 240, 80),
                   child: Icon(Icons.call, color: Colors.white, size: 30),
                 ),
 
@@ -119,6 +119,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       _input(
                         controller: nameController,
                         hint: "Your Name",
+
                         validator: (v) => v!.isEmpty ? "Enter name" : null,
                       ),
 
@@ -176,7 +177,10 @@ class _ContactScreenState extends State<ContactScreen> {
                 /// CONTACT INFO
                 _info(Icons.phone, "+1 234 567 890"),
                 _info(Icons.email, "support@enjoi.jewelry"),
-                _info(Icons.location_on, "123 Jewelry Lane, City, Country"),
+                _info(
+                  Icons.location_on,
+                  " Qala-e fatullah 8 street, kabul, Afghanistan",
+                ),
 
                 const SizedBox(height: 20),
 
