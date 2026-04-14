@@ -1,35 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// class MainScreen extends StatelessWidget {
-//   const MainScreen({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("Jewelry", style: TextStyle(color: Colors.green)),
-//       ),
-//       body: Center(child: Text("Main Screen", style: TextStyle(fontSize: 24))),
-
-//       bottomNavigationBar: BottomNavigationBar(
-//         items: const [
-//           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.category),
-//             label: "Categories",
-//           ),
-//           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-//           BottomNavigationBarItem(icon: Icon(Icons.phone), label: "Contact"),
-//           BottomNavigationBarItem(
-//             icon: Icon(Icons.favorite),
-//             label: "Favorites",
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatelessWidget {
@@ -40,6 +8,7 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Jewelry", style: TextStyle(color: Colors.green)),
+        centerTitle: true,
       ),
 
       body: const Center(
@@ -48,26 +17,39 @@ class MainScreen extends StatelessWidget {
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: 2, // Home selected
+        currentIndex: 0, // ✅ Home selected
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
 
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.phone_outlined),
-            label: "Contact",
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: "Home",
           ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view_outlined),
+            activeIcon: Icon(Icons.grid_view),
+            label: "Products",
+          ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite_border),
+            activeIcon: Icon(Icons.favorite),
             label: "Favorites",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+
           BottomNavigationBarItem(
-            icon: Icon(Icons.category_outlined),
-            label: "Categories",
+            icon: Icon(Icons.phone_outlined),
+            activeIcon: Icon(Icons.phone),
+            label: "Contact",
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
             label: "Profile",
           ),
         ],
