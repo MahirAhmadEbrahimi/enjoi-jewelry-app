@@ -36,6 +36,12 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text("Jewelry", style: TextStyle(color: Colors.green)),
         centerTitle: false,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.green),
+          ),
+        ],
       ),
 
       // ✅ Change screen here
