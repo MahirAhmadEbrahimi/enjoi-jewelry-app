@@ -33,7 +33,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Jewelry"), centerTitle: true),
+      appBar: AppBar(
+        title: const Text("Jewelry", style: TextStyle(color: Colors.green)),
+        centerTitle: false,
+      ),
 
       // ✅ Change screen here
       body: _screens[_currentIndex],

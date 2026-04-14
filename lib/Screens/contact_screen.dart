@@ -6,7 +6,10 @@ class ContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("Contact Screen", style: TextStyle(fontSize: 24)),
+      child: Text(
+        "Contact Screen",
+        style: TextStyle(color: Colors.green, fontSize: 24),
+      ),
     );
   }
 }

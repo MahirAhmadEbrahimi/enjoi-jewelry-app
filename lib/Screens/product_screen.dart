@@ -6,7 +6,10 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("Product Screen", style: TextStyle(fontSize: 24)),
+      child: Text(
+        "Product Screen",
+        style: TextStyle(fontSize: 24, color: Colors.green),
+      ),
     );
   }
 }
