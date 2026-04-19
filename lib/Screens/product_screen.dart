@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -14,6 +15,61 @@ class _ProductScreenState extends State<ProductScreen> {
 
   String _selectedCategory = 'All';
   final Set<int> _favorites = {};
+
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _search = '';
+
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  Timer? _sliderTimer;
+
+  final List<String> _sliderImages = const [
+    'assets/images/1.jpg',
+    'assets/images/3.jpg',
+    'assets/images/5.jpg',
+    'assets/images/7.jpg',
+    'assets/images/9.jpg',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startSliderTimer();
+    _searchCtrl.addListener(() {
+      setState(() => _search = _searchCtrl.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _sliderTimer?.cancel();
+    _pageController.dispose();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _startSliderTimer() {
+    _sliderTimer?.cancel();
+    _sliderTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!mounted || !_pageController.hasClients) return;
+      final next = (_currentPage + 1) % _sliderImages.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 450),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _goToSlide(int index) {
+    final target = index % _sliderImages.length;
+    _pageController.animateToPage(
+      target < 0 ? _sliderImages.length - 1 : target,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+    _startSliderTimer();
+  }
 
   final List<_Product> _products = const [
     _Product(
@@ -103,8 +159,13 @@ class _ProductScreenState extends State<ProductScreen> {
   ];
 
   List<_Product> get _filtered {
-    if (_selectedCategory == 'All') return _products;
-    return _products.where((p) => p.category == _selectedCategory).toList();
+    return _products.where((p) {
+      final matchCat =
+          _selectedCategory == 'All' || p.category == _selectedCategory;
+      final matchSearch =
+          _search.isEmpty || p.name.toLowerCase().contains(_search);
+      return matchCat && matchSearch;
+    }).toList();
   }
 
   @override
@@ -116,7 +177,19 @@ class _ProductScreenState extends State<ProductScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: _searchBar(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+              child: _heroSlider(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: _promoBanner(),
             ),
           ),
@@ -125,13 +198,25 @@ class _ProductScreenState extends State<ProductScreen> {
           SliverToBoxAdapter(child: _categoryBar()),
           const SliverToBoxAdapter(child: SizedBox(height: 14)),
           if (items.isEmpty)
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 40),
+                padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Center(
-                  child: Text(
-                    'No products in this category',
-                    style: TextStyle(color: Colors.black54),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.search_off_rounded,
+                        size: 48,
+                        color: kGreen,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _search.isNotEmpty
+                            ? 'No results for "${_searchCtrl.text}"'
+                            : 'No products in this category',
+                        style: const TextStyle(color: Colors.black54),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -154,6 +239,160 @@ class _ProductScreenState extends State<ProductScreen> {
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
+      ),
+    );
+  }
+
+  Widget _searchBar() {
+    return TextField(
+      controller: _searchCtrl,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: 'Search jewelry...',
+        hintStyle: TextStyle(color: Colors.grey.shade500),
+        prefixIcon: const Icon(Icons.search, color: kGreen),
+        suffixIcon: _searchCtrl.text.isEmpty
+            ? null
+            : IconButton(
+                icon: Icon(Icons.close, color: Colors.grey.shade600),
+                onPressed: () {
+                  _searchCtrl.clear();
+                  FocusScope.of(context).unfocus();
+                },
+              ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.green.shade100, width: 1.3),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: kGreen, width: 1.6),
+        ),
+      ),
+    );
+  }
+
+  Widget _heroSlider() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: SizedBox(
+        height: 180,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: _sliderImages.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (context, i) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      _sliderImages[i],
+                      fit: BoxFit.cover,
+                      errorBuilder: (c, e, s) => Container(
+                        color: kGreenLight,
+                        child: const Center(
+                          child: Icon(Icons.diamond, color: kGreen, size: 48),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.55),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Positioned(
+                      left: 18,
+                      bottom: 18,
+                      right: 18,
+                      child: Text(
+                        'Discover Timeless Elegance',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            Positioned(
+              left: 8,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _sliderArrow(
+                  Icons.chevron_left,
+                  () => _goToSlide(_currentPage - 1),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 8,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: _sliderArrow(
+                  Icons.chevron_right,
+                  () => _goToSlide(_currentPage + 1),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 8,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_sliderImages.length, (i) {
+                  final active = i == _currentPage;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                    width: active ? 18 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: active ? Colors.white : Colors.white54,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sliderArrow(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.85),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, color: kGreenDark, size: 22),
+        ),
       ),
     );
   }
