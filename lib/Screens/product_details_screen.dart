@@ -18,7 +18,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _sizeIndex = 2;
   bool _isFavorite = false;
 
-  final List<String> _ringSizes = const ['5.0', '5.5', '6.0', '6.5', '7.0', '7.5'];
+  final List<String> _ringSizes = const [
+    '5.0',
+    '5.5',
+    '6.0',
+    '6.5',
+    '7.0',
+    '7.5',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -28,45 +35,68 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 340,
-            pinned: true,
-            backgroundColor: Colors.white,
-            foregroundColor: kGreenDark,
-            elevation: 0,
-            leading: _circleIconButton(
-              Icons.arrow_back_ios_new,
-              () => Navigator.pop(context),
-            ),
-            actions: [
-              _circleIconButton(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                () => setState(() => _isFavorite = !_isFavorite),
-              ),
-              const SizedBox(width: 12),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'product-${p.id}',
-                child: Container(
-                  color: kGreenLight,
-                  child: Image.asset(
-                    p.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (c, e, s) => const Center(
-                      child: Icon(Icons.diamond, color: kGreen, size: 80),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 340,
+                      width: double.infinity,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Hero(
+                              tag: 'product-${p.id}',
+                              child: Container(
+                                color: kGreenLight,
+                                child: Image.asset(
+                                  p.image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (c, e, s) => const Center(
+                                    child: Icon(
+                                      Icons.diamond,
+                                      color: kGreen,
+                                      size: 80,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            left: 10,
+                            child: _circleIconButton(
+                              Icons.arrow_back_ios_new,
+                              () => Navigator.pop(context),
+                            ),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: _circleIconButton(
+                              _isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              () => setState(() => _isFavorite = !_isFavorite),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    _details(p, needsSize, total),
+                  ],
                 ),
               ),
             ),
-          ),
-          SliverToBoxAdapter(child: _details(p, needsSize, total)),
-        ],
+            _bottomBar(p, total),
+          ],
+        ),
       ),
-      bottomNavigationBar: _bottomBar(p, total),
     );
   }
 
@@ -100,74 +130,125 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: kGreenLight,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              p.category,
-              style: const TextStyle(
-                color: kGreenDark,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: kGreenLight,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Text(
-                  p.name,
+                  p.category,
                   style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
                     color: kGreenDark,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              Text(
-                '\$${p.price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: kGreen,
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle, color: kGreen, size: 12),
+                    SizedBox(width: 4),
+                    Text(
+                      'In Stock',
+                      style: TextStyle(
+                        color: kGreenDark,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          Text(
+            p.name,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: kGreenDark,
+              height: 1.2,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Icon(Icons.star_rounded, color: Color(0xFFF5B400), size: 20),
-              const SizedBox(width: 4),
-              const Text(
-                '4.8',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              const SizedBox(width: 6),
               Text(
-                '(128 reviews)',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.local_shipping_outlined,
-                color: kGreen,
-                size: 18,
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                'Free shipping',
-                style: TextStyle(
-                  color: kGreenDark,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                '\$${p.price.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: kGreen,
                 ),
               ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '\$${(p.price * 1.25).toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade500,
+                    decoration: TextDecoration.lineThrough,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEBEE),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    '-20%',
+                    style: TextStyle(
+                      color: Color(0xFFC62828),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 14,
+            runSpacing: 8,
+            children: [
+              _infoChip(
+                Icons.star_rounded,
+                '4.8 (128 reviews)',
+                const Color(0xFFF5B400),
+              ),
+              _infoChip(Icons.local_shipping_outlined, 'Free shipping', kGreen),
+              _infoChip(Icons.verified_outlined, 'Authentic', kGreen),
             ],
           ),
           const SizedBox(height: 20),
@@ -189,6 +270,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               height: 1.5,
             ),
           ),
+          const SizedBox(height: 18),
+          const Text(
+            'Specifications',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: kGreenDark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _specRow('Material', _materialFor(p.category)),
+          _specRow('Category', p.category),
+          _specRow('SKU', 'ENJ-${p.id.toString().padLeft(4, '0')}'),
+          _specRow('Warranty', '1 Year'),
           if (needsSize) ...[
             const SizedBox(height: 22),
             const Text(
@@ -246,9 +341,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               const Spacer(),
               _qtyButton(
                 Icons.remove,
-                _quantity > 1
-                    ? () => setState(() => _quantity--)
-                    : null,
+                _quantity > 1 ? () => setState(() => _quantity--) : null,
               ),
               SizedBox(
                 width: 40,
@@ -286,6 +379,70 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  Widget _infoChip(IconData icon, String text, Color iconColor) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: iconColor, size: 16),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            color: kGreenDark,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _specRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: kGreenDark,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _materialFor(String category) {
+    switch (category) {
+      case 'Rings':
+        return '18K Gold with Diamond';
+      case 'Earrings':
+        return '925 Sterling Silver';
+      case 'Necklaces':
+        return '18K Gold Plated';
+      case 'Bracelets':
+        return 'Rose Gold with Gemstones';
+      default:
+        return 'Premium Alloy';
+    }
+  }
+
   Widget _bottomBar(Product p, double total) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
@@ -293,55 +450,54 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.green.shade100)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Total',
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              ),
+              Text(
+                '\$${total.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: kGreen,
                 ),
-                Text(
-                  '\$${total.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: kGreen,
+              ),
+            ],
+          ),
+          const SizedBox(width: 18),
+          Expanded(
+            child: SizedBox(
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () => _addToCart(p),
+                icon: const Icon(Icons.shopping_bag_outlined, size: 20),
+                label: const Text(
+                  'Add to Cart',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(width: 18),
-            Expanded(
-              child: SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: () => _addToCart(p),
-                  icon: const Icon(Icons.shopping_bag_outlined, size: 20),
-                  label: const Text(
-                    'Add to Cart',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kGreen,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kGreen,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -364,9 +520,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         backgroundColor: kGreen,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(12),
         duration: const Duration(seconds: 2),
       ),
