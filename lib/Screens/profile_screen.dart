@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 
@@ -27,6 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final confirmController = TextEditingController();
 
   File? image;
+  XFile? _pickedX;
   final auth = AuthService();
 
   @override
@@ -41,8 +44,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      setState(() => image = File(picked.path));
+      setState(() {
+        _pickedX = picked;
+        image = File(picked.path);
+      });
     }
+  }
+
+  Future<void> _saveUserToDb({
+    required String uid,
+    required String name,
+    required String email,
+  }) async {
+    String? imageBase64;
+    if (_pickedX != null) {
+      try {
+        final bytes = await _pickedX!.readAsBytes();
+        imageBase64 = base64Encode(bytes);
+      } catch (_) {
+        imageBase64 = null;
+      }
+    }
+
+    final url = Uri.parse(
+      "https://jewelryapp-69ec8-default-rtdb.firebaseio.com/jewelryapp/users/$uid.json",
+    );
+
+    await http.put(
+      url,
+      body: jsonEncode({
+        "uid": uid,
+        "name": name,
+        "email": email,
+        "image": imageBase64,
+        "createdAt": DateTime.now().toIso8601String(),
+      }),
+    );
+  }
+
+  void _clearInputs() {
+    nameController.clear();
+    emailController.clear();
+    passController.clear();
+    confirmController.clear();
+    _formKey.currentState?.reset();
+    setState(() {
+      image = null;
+      _pickedX = null;
+    });
   }
 
   String? _validateName(String? v) {
@@ -95,17 +144,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => isLoading = true);
 
     String? error;
+    String? newUid;
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+
     if (isLogin) {
-      error = await auth.login(
-        emailController.text.trim(),
-        passController.text.trim(),
-      );
+      error = await auth.login(email, passController.text.trim());
     } else {
-      error = await auth.signUp(
-        nameController.text.trim(),
-        emailController.text.trim(),
-        passController.text.trim(),
-      );
+      final result = await auth.signUp(name, email, passController.text.trim());
+      error = result.error;
+      newUid = result.uid;
+    }
+
+    if (!mounted) return;
+
+    if (error == null && !isLogin && newUid != null) {
+      try {
+        await _saveUserToDb(uid: newUid, name: name, email: email);
+      } catch (_) {}
     }
 
     if (!mounted) return;
@@ -118,6 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         isLogin ? 'Welcome back! ✓' : 'Account created successfully ✓',
         isError: false,
       );
+      _clearInputs();
     }
   }
 
