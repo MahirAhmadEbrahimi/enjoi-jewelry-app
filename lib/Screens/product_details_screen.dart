@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/cart_service.dart';
 import '../services/favorites_service.dart';
+import '../services/rating_service.dart';
 import 'product_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -23,11 +24,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void initState() {
     super.initState();
     FavoritesService.instance.addListener(_onFavChanged);
+    RatingService.instance.addListener(_onFavChanged);
+    if (!RatingService.instance.isLoaded) {
+      RatingService.instance.load();
+    }
   }
 
   @override
   void dispose() {
     FavoritesService.instance.removeListener(_onFavChanged);
+    RatingService.instance.removeListener(_onFavChanged);
     super.dispose();
   }
 
@@ -261,7 +267,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             children: [
               _infoChip(
                 Icons.star_rounded,
-                '4.8 (128 reviews)',
+                _ratingChipText(p.id),
                 const Color(0xFFF5B400),
               ),
               _infoChip(Icons.local_shipping_outlined, 'Free shipping', kGreen),
@@ -301,6 +307,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           _specRow('Category', p.category),
           _specRow('SKU', 'ENJ-${p.id.toString().padLeft(4, '0')}'),
           _specRow('Warranty', '1 Year'),
+          const SizedBox(height: 18),
+          _ratingSection(p.id),
           if (needsSize) ...[
             const SizedBox(height: 22),
             const Text(
@@ -458,6 +466,130 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       default:
         return 'Premium Alloy';
     }
+  }
+
+  String _ratingChipText(int productId) {
+    final avg = RatingService.instance.averageFor(productId);
+    final count = RatingService.instance.countFor(productId);
+    if (count == 0) return 'No reviews yet';
+    final plural = count == 1 ? 'review' : 'reviews';
+    return '${avg.toStringAsFixed(1)} ($count $plural)';
+  }
+
+  Widget _ratingSection(int productId) {
+    final avg = RatingService.instance.averageFor(productId);
+    final count = RatingService.instance.countFor(productId);
+    final mine = RatingService.instance.myRatingFor(productId);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: kGreenLight,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'Ratings & Reviews',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: kGreenDark,
+                ),
+              ),
+              const Spacer(),
+              if (count > 0) ...[
+                const Icon(
+                  Icons.star_rounded,
+                  color: Color(0xFFF5B400),
+                  size: 20,
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  avg.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: kGreenDark,
+                  ),
+                ),
+                Text(
+                  '  ·  $count',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                ),
+              ] else
+                Text(
+                  'Be the first to rate',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            mine != null
+                ? 'Your rating ($mine / 5) — tap a star to change'
+                : 'Tap a star to rate this product',
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: List.generate(5, (i) {
+              final filled = mine != null && i < mine;
+              return GestureDetector(
+                onTap: () => _submitRating(productId, i + 1),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    filled ? Icons.star_rounded : Icons.star_border_rounded,
+                    color: filled
+                        ? const Color(0xFFF5B400)
+                        : kGreenDark.withValues(alpha: 0.5),
+                    size: 30,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _submitRating(int productId, int stars) async {
+    final err = await RatingService.instance.rate(productId, stars);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              err == null ? Icons.check_circle_outline : Icons.error_outline,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                err ?? 'Thanks! You rated this product $stars / 5',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: err == null ? kGreen : Colors.red.shade600,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Widget _bottomBar(Product p, double total) {
