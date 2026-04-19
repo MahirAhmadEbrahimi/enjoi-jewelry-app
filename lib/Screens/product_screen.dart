@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'product_details_screen.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
@@ -71,85 +72,85 @@ class _ProductScreenState extends State<ProductScreen> {
     _startSliderTimer();
   }
 
-  final List<_Product> _products = const [
-    _Product(
+  final List<Product> _products = const [
+    Product(
       id: 0,
       name: 'Aquamarine Ring',
       price: 255.00,
       image: 'assets/images/1.jpg',
       category: 'Rings',
     ),
-    _Product(
+    Product(
       id: 1,
       name: 'Gold Diamond',
       price: 300.00,
       image: 'assets/images/2.jpg',
       category: 'Rings',
     ),
-    _Product(
+    Product(
       id: 2,
       name: 'Emerald Earrings',
       price: 180.00,
       image: 'assets/images/3.jpg',
       category: 'Earrings',
     ),
-    _Product(
+    Product(
       id: 3,
       name: 'Pearl Necklace',
       price: 420.00,
       image: 'assets/images/5.jpg',
       category: 'Necklaces',
     ),
-    _Product(
+    Product(
       id: 4,
       name: 'Rose Gold Bracelet',
       price: 140.00,
       image: 'assets/images/6.jpg',
       category: 'Bracelets',
     ),
-    _Product(
+    Product(
       id: 5,
       name: 'Diamond Studs',
       price: 275.00,
       image: 'assets/images/7.jpg',
       category: 'Earrings',
     ),
-    _Product(
+    Product(
       id: 6,
       name: 'Silver Chain',
       price: 95.00,
       image: 'assets/images/8.jpg',
       category: 'Necklaces',
     ),
-    _Product(
+    Product(
       id: 7,
       name: 'Solitaire Ring',
       price: 520.00,
       image: 'assets/images/9.jpg',
       category: 'Rings',
     ),
-    _Product(
+    Product(
       id: 8,
       name: 'Sapphire Pendant',
       price: 380.00,
       image: 'assets/images/10.jpg',
       category: 'Necklaces',
     ),
-    _Product(
+    Product(
       id: 9,
       name: 'Classic Bangle',
       price: 210.00,
       image: 'assets/images/11.jpg',
       category: 'Bracelets',
     ),
-    _Product(
+    Product(
       id: 10,
       name: 'Crystal Drops',
       price: 165.00,
       image: 'assets/images/12.jpg',
       category: 'Earrings',
     ),
-    _Product(
+    Product(
       id: 11,
       name: 'Tennis Bracelet',
       price: 340.00,
@@ -158,7 +159,7 @@ class _ProductScreenState extends State<ProductScreen> {
     ),
   ];
 
-  List<_Product> get _filtered {
+  List<Product> get _filtered {
     return _products.where((p) {
       final matchCat =
           _selectedCategory == 'All' || p.category == _selectedCategory;
@@ -521,25 +522,12 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
-  Widget _productCard(_Product p) {
+  Widget _productCard(Product p) {
     final isFav = _favorites.contains(p.id);
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${p.name} — \$${p.price.toStringAsFixed(2)}',
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: kGreen,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.all(12),
-            duration: const Duration(seconds: 2),
-          ),
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: p)),
         );
       },
       child: Container(
@@ -566,13 +554,20 @@ class _ProductScreenState extends State<ProductScreen> {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(15),
                       ),
-                      child: Container(
-                        color: kGreenLight,
-                        child: Image.asset(
-                          p.image,
-                          fit: BoxFit.cover,
-                          errorBuilder: (c, e, s) => const Center(
-                            child: Icon(Icons.diamond, color: kGreen, size: 40),
+                      child: Hero(
+                        tag: 'product-${p.id}',
+                        child: Container(
+                          color: kGreenLight,
+                          child: Image.asset(
+                            p.image,
+                            fit: BoxFit.cover,
+                            errorBuilder: (c, e, s) => const Center(
+                              child: Icon(
+                                Icons.diamond,
+                                color: kGreen,
+                                size: 40,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -659,14 +654,14 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 }
 
-class _Product {
+class Product {
   final int id;
   final String name;
   final double price;
   final String image;
   final String category;
 
-  const _Product({
+  const Product({
     required this.id,
     required this.name,
     required this.price,
