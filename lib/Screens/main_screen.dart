@@ -19,12 +19,12 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ProductScreen(),
-    FavoriteScreen(),
-    ContactScreen(),
-    ProfileScreen(),
+  late final List<Widget> _screens = [
+    HomeScreen(onNavigate: _onTap),
+    const ProductScreen(),
+    const FavoriteScreen(),
+    const ContactScreen(),
+    const ProfileScreen(),
   ];
 
   @override
