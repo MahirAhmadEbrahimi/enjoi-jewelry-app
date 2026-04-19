@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../services/favorites_service.dart';
 import 'product_details_screen.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class _ProductScreenState extends State<ProductScreen> {
   static const Color kGreenLight = Color(0xFFE8F5E9);
 
   String _selectedCategory = 'All';
-  final Set<int> _favorites = {};
 
   final TextEditingController _searchCtrl = TextEditingController();
   String _search = '';
@@ -39,14 +39,23 @@ class _ProductScreenState extends State<ProductScreen> {
     _searchCtrl.addListener(() {
       setState(() => _search = _searchCtrl.text.trim().toLowerCase());
     });
+    FavoritesService.instance.addListener(_onFavoritesChanged);
+    if (!FavoritesService.instance.isLoaded) {
+      FavoritesService.instance.load();
+    }
   }
 
   @override
   void dispose() {
+    FavoritesService.instance.removeListener(_onFavoritesChanged);
     _sliderTimer?.cancel();
     _pageController.dispose();
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onFavoritesChanged() {
+    if (mounted) setState(() {});
   }
 
   void _startSliderTimer() {
@@ -523,7 +532,7 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Widget _productCard(Product p) {
-    final isFav = _favorites.contains(p.id);
+    final isFav = FavoritesService.instance.contains(p.id);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
@@ -578,13 +587,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     right: 8,
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          if (isFav) {
-                            _favorites.remove(p.id);
-                          } else {
-                            _favorites.add(p.id);
-                          }
-                        });
+                        FavoritesService.instance.toggle(p);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),

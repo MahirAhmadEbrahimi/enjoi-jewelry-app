@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/favorites_service.dart';
 import 'product_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -16,7 +17,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   int _quantity = 1;
   int _sizeIndex = 2;
-  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    FavoritesService.instance.addListener(_onFavChanged);
+  }
+
+  @override
+  void dispose() {
+    FavoritesService.instance.removeListener(_onFavChanged);
+    super.dispose();
+  }
+
+  void _onFavChanged() {
+    if (mounted) setState(() {});
+  }
 
   final List<String> _ringSizes = const [
     '5.0',
@@ -79,10 +95,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             top: 10,
                             right: 10,
                             child: _circleIconButton(
-                              _isFavorite
+                              FavoritesService.instance.contains(p.id)
                                   ? Icons.favorite
                                   : Icons.favorite_border,
-                              () => setState(() => _isFavorite = !_isFavorite),
+                              () => FavoritesService.instance.toggle(p),
                             ),
                           ),
                         ],
