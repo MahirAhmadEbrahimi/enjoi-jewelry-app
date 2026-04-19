@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/cart_service.dart';
+import './cart_drawer.dart';
 import './home_screen.dart';
 import './product_screen.dart';
 import './favorite_screen.dart';
@@ -15,6 +17,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -24,6 +27,25 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    CartService.instance.addListener(_onCartChanged);
+    if (!CartService.instance.isLoaded) {
+      CartService.instance.load();
+    }
+  }
+
+  @override
+  void dispose() {
+    CartService.instance.removeListener(_onCartChanged);
+    super.dispose();
+  }
+
+  void _onCartChanged() {
+    if (mounted) setState(() {});
+  }
+
   void _onTap(int index) {
     setState(() {
       _currentIndex = index;
@@ -32,14 +54,52 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cartCount = CartService.instance.count;
     return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: const CartDrawer(),
       appBar: AppBar(
         title: const Text("Jewelry", style: TextStyle(color: Colors.green)),
         centerTitle: false,
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.shopping_cart_outlined, color: Colors.green),
+            tooltip: 'Cart',
+            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.shopping_cart_outlined, color: Colors.green),
+                if (cartCount > 0)
+                  Positioned(
+                    right: -6,
+                    top: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E7D32),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        '$cartCount',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

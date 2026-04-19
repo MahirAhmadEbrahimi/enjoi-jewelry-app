@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/cart_service.dart';
 import '../services/favorites_service.dart';
 import 'product_screen.dart';
 
@@ -519,6 +520,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _addToCart(Product p) {
+    final evictedId = CartService.instance.add(p, _quantity);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -528,7 +530,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '$_quantity × ${p.name} added to cart',
+                evictedId != null
+                    ? 'Cart full — oldest item replaced with ${p.name}'
+                    : '$_quantity × ${p.name} added to cart',
                 style: const TextStyle(color: Colors.white),
               ),
             ),
