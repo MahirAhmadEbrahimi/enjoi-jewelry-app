@@ -34,6 +34,16 @@ class RatingService extends ChangeNotifier {
     return _ratings[productId]?[uid];
   }
 
+  int get myRatingsCount {
+    final uid = _uid;
+    if (uid == null) return 0;
+    var n = 0;
+    for (final m in _ratings.values) {
+      if (m.containsKey(uid)) n++;
+    }
+    return n;
+  }
+
   Future<void> load() async {
     if (_loading) return;
     _loading = true;
@@ -71,9 +81,7 @@ class RatingService extends ChangeNotifier {
     _ratings.putIfAbsent(productId, () => {})[uid] = stars;
     notifyListeners();
     try {
-      final url = Uri.parse(
-        '$_dbBase/jewelryapp/ratings/$productId/$uid.json',
-      );
+      final url = Uri.parse('$_dbBase/jewelryapp/ratings/$productId/$uid.json');
       final res = await http.put(
         url,
         headers: {'Content-Type': 'application/json'},
