@@ -20,6 +20,10 @@ class _ProductScreenState extends State<ProductScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
   String _search = '';
 
+  static const int _pageSize = 20;
+  int _pageIndex = 0;
+  final ScrollController _scrollCtrl = ScrollController();
+
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _sliderTimer;
@@ -37,7 +41,10 @@ class _ProductScreenState extends State<ProductScreen> {
     super.initState();
     _startSliderTimer();
     _searchCtrl.addListener(() {
-      setState(() => _search = _searchCtrl.text.trim().toLowerCase());
+      setState(() {
+        _search = _searchCtrl.text.trim().toLowerCase();
+        _pageIndex = 0;
+      });
     });
     FavoritesService.instance.addListener(_onFavoritesChanged);
     if (!FavoritesService.instance.isLoaded) {
@@ -51,6 +58,7 @@ class _ProductScreenState extends State<ProductScreen> {
     _sliderTimer?.cancel();
     _pageController.dispose();
     _searchCtrl.dispose();
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -166,6 +174,76 @@ class _ProductScreenState extends State<ProductScreen> {
       image: 'assets/images/13.jpg',
       category: 'Bracelets',
     ),
+    Product(
+      id: 12,
+      name: 'Crystal Drops',
+      price: 165.00,
+      image: 'assets/images/12.jpg',
+      category: 'Earrings',
+    ),
+    Product(
+      id: 13,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/13.jpg',
+      category: 'Bracelets',
+    ),
+    Product(
+      id: 14,
+      name: 'Crystal Drops',
+      price: 165.00,
+      image: 'assets/images/12.jpg',
+      category: 'Earrings',
+    ),
+    Product(
+      id: 15,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/13.jpg',
+      category: 'Bracelets',
+    ),
+    Product(
+      id: 16,
+      name: 'Crystal Drops',
+      price: 165.00,
+      image: 'assets/images/12.jpg',
+      category: 'Earrings',
+    ),
+    Product(
+      id: 17,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/13.jpg',
+      category: 'Bracelets',
+    ),
+    Product(
+      id: 18,
+      name: 'Crystal Drops',
+      price: 165.00,
+      image: 'assets/images/12.jpg',
+      category: 'Earrings',
+    ),
+    Product(
+      id: 19,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/13.jpg',
+      category: 'Bracelets',
+    ),
+    Product(
+      id: 20,
+      name: 'Crystal Drops',
+      price: 165.00,
+      image: 'assets/images/12.jpg',
+      category: 'Earrings',
+    ),
+    Product(
+      id: 21,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/13.jpg',
+      category: 'Bracelets',
+    ),
   ];
 
   List<Product> get _filtered {
@@ -178,12 +256,40 @@ class _ProductScreenState extends State<ProductScreen> {
     }).toList();
   }
 
+  int _totalPages(int totalItems) {
+    if (totalItems == 0) return 1;
+    return (totalItems + _pageSize - 1) ~/ _pageSize;
+  }
+
+  List<Product> _pageSlice(List<Product> all) {
+    final start = _pageIndex * _pageSize;
+    if (start >= all.length) return const [];
+    final end = (start + _pageSize).clamp(0, all.length);
+    return all.sublist(start, end);
+  }
+
+  void _changePage(int newIndex) {
+    setState(() => _pageIndex = newIndex);
+    if (_scrollCtrl.hasClients) {
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final items = _filtered;
+    final all = _filtered;
+    final totalPages = _totalPages(all.length);
+    if (_pageIndex >= totalPages) _pageIndex = totalPages - 1;
+    if (_pageIndex < 0) _pageIndex = 0;
+    final items = _pageSlice(all);
     return Container(
       color: Colors.white,
       child: CustomScrollView(
+        controller: _scrollCtrl,
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
@@ -203,7 +309,7 @@ class _ProductScreenState extends State<ProductScreen> {
               child: _promoBanner(),
             ),
           ),
-          SliverToBoxAdapter(child: _sectionHeader(items.length)),
+          SliverToBoxAdapter(child: _sectionHeader(all.length)),
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
           SliverToBoxAdapter(child: _categoryBar()),
           const SliverToBoxAdapter(child: SizedBox(height: 14)),
@@ -247,6 +353,8 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
               ),
             ),
+          if (totalPages > 1)
+            SliverToBoxAdapter(child: _paginationBar(totalPages, all.length)),
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
         ],
       ),
@@ -504,7 +612,10 @@ class _ProductScreenState extends State<ProductScreen> {
           final c = categories[i];
           final selected = c == _selectedCategory;
           return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = c),
+            onTap: () => setState(() {
+              _selectedCategory = c;
+              _pageIndex = 0;
+            }),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -651,6 +762,99 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _paginationBar(int totalPages, int totalItems) {
+    final start = _pageIndex * _pageSize + 1;
+    final end = ((_pageIndex + 1) * _pageSize).clamp(0, totalItems);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
+      child: Column(
+        children: [
+          Text(
+            'Showing $start - $end of $totalItems',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _pageArrowBtn(
+                Icons.chevron_left,
+                _pageIndex > 0,
+                () => _changePage(_pageIndex - 1),
+              ),
+              const SizedBox(width: 6),
+              ...List.generate(totalPages, (i) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: _pageNumberBtn(i),
+                );
+              }),
+              const SizedBox(width: 6),
+              _pageArrowBtn(
+                Icons.chevron_right,
+                _pageIndex < totalPages - 1,
+                () => _changePage(_pageIndex + 1),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pageNumberBtn(int i) {
+    final selected = i == _pageIndex;
+    return GestureDetector(
+      onTap: selected ? null : () => _changePage(i),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? kGreen : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? kGreen : Colors.green.shade200,
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          '${i + 1}',
+          style: TextStyle(
+            color: selected ? Colors.white : kGreenDark,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _pageArrowBtn(IconData icon, bool enabled, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: enabled ? kGreenLight : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: enabled ? Colors.green.shade200 : Colors.grey.shade200,
+            width: 1.2,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: enabled ? kGreenDark : Colors.grey.shade400,
+          size: 20,
         ),
       ),
     );
