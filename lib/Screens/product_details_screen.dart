@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/cart_service.dart';
 import '../services/favorites_service.dart';
 import '../services/rating_service.dart';
+import 'main_screen.dart';
 import 'product_screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -106,6 +107,35 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   ? Icons.favorite
                                   : Icons.favorite_border,
                               () => FavoritesService.instance.toggle(p),
+                            ),
+                          ),
+                          Positioned(
+                            top: 18,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => MainScreen.goToTab(context, 0),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Text(
+                                    'Jewelry',
+                                    style: TextStyle(
+                                      color: kGreenDark,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],

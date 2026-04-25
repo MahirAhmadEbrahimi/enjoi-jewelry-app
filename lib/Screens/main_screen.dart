@@ -11,6 +11,13 @@ import './profile_screen.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
+  static _MainScreenState? _activeState;
+
+  static void goToTab(BuildContext context, int index) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _activeState?._onTap(index);
+  }
+
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
@@ -30,6 +37,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    MainScreen._activeState = this;
     CartService.instance.addListener(_onCartChanged);
     if (!CartService.instance.isLoaded) {
       CartService.instance.load();
@@ -38,6 +46,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
+    if (MainScreen._activeState == this) {
+      MainScreen._activeState = null;
+    }
     CartService.instance.removeListener(_onCartChanged);
     super.dispose();
   }
@@ -59,7 +70,11 @@ class _MainScreenState extends State<MainScreen> {
       key: _scaffoldKey,
       endDrawer: const CartDrawer(),
       appBar: AppBar(
-        title: const Text("Jewelry", style: TextStyle(color: Colors.green)),
+        title: GestureDetector(
+          onTap: () => MainScreen.goToTab(context, 0),
+          behavior: HitTestBehavior.opaque,
+          child: const Text("Jewelry", style: TextStyle(color: Colors.green)),
+        ),
         centerTitle: false,
         actions: [
           IconButton(
