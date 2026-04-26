@@ -29,11 +29,11 @@ class _ProductScreenState extends State<ProductScreen> {
   Timer? _sliderTimer;
 
   final List<String> _sliderImages = const [
-    'assets/images/1.jpg',
-    'assets/images/3.jpg',
-    'assets/images/5.jpg',
-    'assets/images/7.jpg',
-    'assets/images/9.jpg',
+    'assets/images/11.jpg',
+    'assets/images/11166.JPG',
+    'assets/images/77.JPG',
+    'assets/images/44.jpg',
+    'assets/images/55.JPG',
   ];
 
   @override
@@ -102,7 +102,7 @@ class _ProductScreenState extends State<ProductScreen> {
       name: 'Gold Diamond',
       price: 300.00,
       image: 'assets/images/2.jpg',
-      category: 'Rings',
+      category: 'Watches',
     ),
     Product(
       id: 2,
@@ -115,7 +115,7 @@ class _ProductScreenState extends State<ProductScreen> {
       id: 3,
       name: 'Pearl Necklace',
       price: 420.00,
-      image: 'assets/images/5.jpg',
+      image: 'assets/images/129.JPG',
       category: 'Necklaces',
     ),
     Product(
@@ -123,14 +123,14 @@ class _ProductScreenState extends State<ProductScreen> {
       name: 'Rose Gold Bracelet',
       price: 140.00,
       image: 'assets/images/6.jpg',
-      category: 'Bracelets',
+      category: 'Watches',
     ),
     Product(
       id: 5,
       name: 'Diamond Studs',
       price: 275.00,
       image: 'assets/images/7.jpg',
-      category: 'Earrings',
+      category: 'Necklaces',
     ),
     Product(
       id: 6,
@@ -144,42 +144,42 @@ class _ProductScreenState extends State<ProductScreen> {
       name: 'Solitaire Ring',
       price: 520.00,
       image: 'assets/images/9.jpg',
-      category: 'Rings',
+      category: 'Watches',
     ),
     Product(
       id: 8,
       name: 'Sapphire Pendant',
       price: 380.00,
       image: 'assets/images/10.jpg',
-      category: 'Necklaces',
+      category: 'Watches',
     ),
     Product(
       id: 9,
       name: 'Classic Bangle',
       price: 210.00,
       image: 'assets/images/11.jpg',
-      category: 'Bracelets',
+      category: 'Rings',
     ),
     Product(
       id: 10,
       name: 'Crystal Drops',
       price: 165.00,
       image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      category: 'Rings',
     ),
     Product(
       id: 11,
       name: 'Tennis Bracelet',
       price: 340.00,
       image: 'assets/images/13.jpg',
-      category: 'Bracelets',
+      category: 'Rings',
     ),
     Product(
       id: 12,
       name: 'Crystal Drops',
       price: 165.00,
-      image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      image: 'assets/images/126.JPG',
+      category: 'Necklaces',
     ),
     Product(
       id: 13,
@@ -192,57 +192,64 @@ class _ProductScreenState extends State<ProductScreen> {
       id: 14,
       name: 'Crystal Drops',
       price: 165.00,
-      image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      image: 'assets/images/112.JPG',
+      category: 'Rings',
     ),
     Product(
       id: 15,
       name: 'Tennis Bracelet',
       price: 340.00,
-      image: 'assets/images/13.jpg',
-      category: 'Bracelets',
+      image: 'assets/images/113.JPG',
+      category: 'Rings',
     ),
     Product(
       id: 16,
       name: 'Crystal Drops',
       price: 165.00,
-      image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      image: 'assets/images/114.JPG',
+      category: 'Rings',
     ),
     Product(
       id: 17,
       name: 'Tennis Bracelet',
       price: 340.00,
-      image: 'assets/images/13.jpg',
-      category: 'Bracelets',
+      image: 'assets/images/115.JPG',
+      category: 'Bracelet',
     ),
     Product(
       id: 18,
       name: 'Crystal Drops',
       price: 165.00,
-      image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      image: 'assets/images/116.JPG',
+      category: 'Bracelets',
     ),
     Product(
       id: 19,
       name: 'Tennis Bracelet',
       price: 340.00,
-      image: 'assets/images/13.jpg',
+      image: 'assets/images/117.JPG',
       category: 'Bracelets',
     ),
     Product(
       id: 20,
       name: 'Crystal Drops',
       price: 165.00,
-      image: 'assets/images/12.jpg',
-      category: 'Earrings',
+      image: 'assets/images/128.JPG',
+      category: 'Rings',
     ),
     Product(
       id: 21,
       name: 'Tennis Bracelet',
       price: 340.00,
-      image: 'assets/images/13.jpg',
+      image: 'assets/images/129.JPG',
       category: 'Bracelets',
+    ),
+    Product(
+      id: 22,
+      name: 'Tennis Bracelet',
+      price: 340.00,
+      image: 'assets/images/1121.JPG',
+      category: 'Necklaces',
     ),
   ];
 
@@ -600,7 +607,14 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Widget _categoryBar() {
-    const categories = ['All', 'Necklaces', 'Earrings', 'Rings', 'Bracelets'];
+    const categories = [
+      'All',
+      'Necklaces',
+      "Watches",
+      'Earrings',
+      'Rings',
+      'Bracelets',
+    ];
     return SizedBox(
       height: 42,
       child: ListView.separated(
