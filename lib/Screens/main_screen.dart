@@ -67,9 +67,11 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final cartCount = CartService.instance.count;
     return Scaffold(
+      backgroundColor: Colors.white,
       key: _scaffoldKey,
       endDrawer: const CartDrawer(),
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: GestureDetector(
           onTap: () => MainScreen.goToTab(context, 0),
           behavior: HitTestBehavior.opaque,
@@ -128,6 +130,7 @@ class _MainScreenState extends State<MainScreen> {
         onTap: _onTap,
         selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
 
         items: const [
           BottomNavigationBarItem(
